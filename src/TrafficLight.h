@@ -31,7 +31,7 @@ private:
     std::deque<T> _queue;
     // Also, there should be an std::condition_variable as well as an std::mutex as private members. 
     std::condition_variable _condition;
-    std::mutex curr_mutex;    
+    std::mutex _mutex;
 };
 
 // FP.1 : Define a class âTrafficLightâ which is a child class of TrafficObject. 
@@ -74,7 +74,7 @@ private:
     MessageQueue<TrafficLightPhase> mq;
 
     std::condition_variable _condition;
-    std::mutex curr_mutex;
+    std::mutex _mutex;
 };
 
 #endif
