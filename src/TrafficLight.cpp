@@ -16,7 +16,7 @@ T MessageQueue<T>::receive()
     // The received object should then be returned by the receive function. 
 
     //The method receive should use std::unique_lock<std::mutex> and _condition.wait()
-    std::unique_lock<std::mutex>curr_lock(curr_mutex);
+    std::unique_lock<std::mutex>curr_lock(_mutex);
     _condition.wait(curr_lock, [this]{
         return !_queue.empty();
     });
@@ -37,7 +37,7 @@ void MessageQueue<T>::send(T &&msg)
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
 
     //The method send should use the mechanisms std::lock_guard<std::mutex>
-    std::lock_guard<std::mutex>curr_lock(curr_mutex);
+    std::lock_guard<std::mutex>curr_lock(_mutex);
     _queue.push_back(std::move(msg));
 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
@@ -87,15 +87,13 @@ void TrafficLight::cycleThroughPhases()
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
 
-    //using mt19937 to get distribution between 4 and 6 seconds
-    std:: random_device randomDevice;
-    std:: mt19937 alternate(randomDevice());
+    //To generate a random number between min and max, use:
+    //int randNum = rand()%(max-min + 1) + min;
+
+    int cd_randNum = rand()%(6000 - 4000 + 1) + 4000;
 
     //Returning the ID for curr Thread
     auto prev_time_update = std::chrono::system_clock::now();
-    //The cycle duration should be a random value between 4 and 6 seconds.
-    std::uniform_int_distribution<int> distribute(4,6);
-    auto time_period = distribute(alternate);
 
     //Implement the function with an infinite loop that measures the time between two loop cycles
     while(true){
@@ -108,11 +106,13 @@ void TrafficLight::cycleThroughPhases()
         // and toggles the current phase of the traffic light between red and green and sends an update method 
         // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds.
 
-        if(temp_time >= time_period){
+        if(temp_time >= cd_randNum){
             if(_currentPhase == TrafficLightPhase::red){
                 _currentPhase = TrafficLightPhase::green;
             }
-            _currentPhase = TrafficLightPhase::red;
+            else{
+                _currentPhase = TrafficLightPhase::red;
+            }
             mq.send(std::move(_currentPhase));
             prev_time_update = std::chrono::system_clock::now();
         }
